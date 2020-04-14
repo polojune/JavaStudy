@@ -17,7 +17,7 @@ class MoneyChange {
 				try {
 					Thread.sleep(2000);
 					money = money + 20000;
-					callback.printMoney(money);
+					callback.printMoney(money); // =>여기서 callback 함수를 실행 시킴
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -35,8 +35,7 @@ public class ThreadEx03 {
 
 		MoneyChange mc = new MoneyChange();
 
-		mc.accept(new Callback() {
-
+		mc.accept(new Callback() { // callback 함수는 main에서 제어를 하지만 실행은 다른 쓰레드에서 한다.
 			@Override
 			public void printMoney(int money) {
 				System.out.println("통장의 잔액은:" + money);
