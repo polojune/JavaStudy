@@ -23,7 +23,7 @@ public class StarEx01 {
 	   for (int i = 4; i >0; i--) {
 		   
 	}
-	   int i = 3;
+	   int i = 5;
 	   printStars(i);
 
 	}
