@@ -7,7 +7,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
-import javax.swing.plaf.basic.BasicSliderUI.ScrollListener;
 
 public class ListEx extends JFrame {
     private String[] fruits = {"apple", "banana","kiwi", "mango", "pear", "peach"
