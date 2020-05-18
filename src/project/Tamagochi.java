@@ -1,5 +1,6 @@
-package javastudy;
+package project;
 
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -17,16 +18,17 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.Timer;
 
-class LoginView extends JFrame /* implements Runnable */ {
+class GameStart extends JFrame /* implements Runnable */ {
+	private CharStatus status;
 	JFrame loginView = this;
 	private JButton b1, b2, b3, b4;
 	JScrollPane scrollPane;
 	ImageIcon backIcon = null;
-	ImageIcon backIcon1 =null;
+	ImageIcon backIcon1 = null;
 	ImageIcon characterIcon = null;
 	ImageIcon characterIcon1 = null;
 	ImageIcon characterIcon2 = null;
-	ImageIcon food = null;
+	ImageIcon food[];
 	ImageIcon zzz[];
 	// JLabel lbCharacter;
 	private CharacterPanel panel;
@@ -36,9 +38,12 @@ class LoginView extends JFrame /* implements Runnable */ {
 	int foodX, foodY;
 	Timer timer;
 	Timer zzzTimer;
+	Timer foodTimer;
 	// 기본상태 0, 밥먹기 1, 운동하기 2, 잠자기 3
 
-	public LoginView() {
+	public GameStart() {
+		status = new CharStatus();
+
 		foodX = 0;
 		foodY = 0;
 		x = 150;
@@ -49,13 +54,13 @@ class LoginView extends JFrame /* implements Runnable */ {
 		characterIcon = new ImageIcon("img/k1.png");
 		characterIcon1 = new ImageIcon("img/k3.png");
 		characterIcon2 = new ImageIcon("img/sleep.png");
-		food = new ImageIcon("img/rice1.png");
+		// food = new ImageIcon("img/rice1.png");
 
 //		lbCharacter = new JLabel(characterIcon);
 //		lbCharacter.setSize(200, 200);
 //		lbCharacter.setLocation(x, y);
 		// panel = new CharacterPanel(characterIcon, backIcon, x, y);
-		panel = new CharacterPanel(characterIcon, backIcon, food);
+		panel = new CharacterPanel(characterIcon, backIcon, status);
 
 		/*
 		 * panel = new JPanel() { public void paintComponent(Graphics g) {
@@ -78,10 +83,16 @@ class LoginView extends JFrame /* implements Runnable */ {
 		b1.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				timer.stop();
-				panel.setStatus(1);
-				panel.setImage(characterIcon);
-				panel.setBackImage(backIcon);
+
+				// panel.setImage(foodIcon);
+				if (status.getHungry() < 60) {
+
+					timer.stop();
+					foodTimer.start();
+					panel.setStatus(1);
+					panel.setImage(characterIcon);
+					panel.setBackImage(backIcon);
+				}
 			}
 		});
 
@@ -90,6 +101,7 @@ class LoginView extends JFrame /* implements Runnable */ {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				timer.start();
+				foodTimer.stop();
 				panel.setStatus(2);
 				panel.setImage(characterIcon1);
 				panel.setBackImage(backIcon);
@@ -100,6 +112,7 @@ class LoginView extends JFrame /* implements Runnable */ {
 		b3.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				zzzTimer.start();
 				timer.stop();
 				panel.setStatus(3);
 				panel.setImage(characterIcon2);
@@ -126,7 +139,7 @@ class LoginView extends JFrame /* implements Runnable */ {
 		// th.start();
 		setVisible(true);
 
-		new CurrentTime().runTime(b4);
+		new CurrentTime(status).runTime(b4);
 
 //		b2.addMouseListener(new MouseAdapter() {
 //
@@ -147,33 +160,56 @@ class LoginView extends JFrame /* implements Runnable */ {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// if (chrStatus == 2) {
-					if (x > 300) {
-						delta = (-1 * delta);
-					} else if (x < 0) {
-						delta = (-1 * delta);
-					}
-					x = x + delta;
-				//  }
+				if (x > 300) {
+					delta = (-1 * delta);
+				} else if (x < 0) {
+					delta = (-1 * delta);
+				}
+				x = x + delta;
+				// }
 
 				panel.setPos(x, y);
-				//panel.foodPos(x, y);
-
+				// panel.foodPos(x, y);
+                
 			}
 		});
-		
+
 		zzzTimer = new Timer(600, new ActionListener() {
-					int index = 0;
+			int index = 0;
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
-					
-					if (index >2 ) index = 0;
-				    panel.setZzzIndex(index);
-				    index++;
-				    repaint();
+				if (index > 2) {
+					index = 0;
+					status.setSleep(100);
+
+				}
+				panel.setZzzIndex(index);
+				index++;
+				repaint();
 			}
 		});
-		
-		zzzTimer.start();
+
+		//zzzTimer.start();
+
+		foodTimer = new Timer(1500, new ActionListener() {
+			int index = 0;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (index > 2) {
+					index = 0;
+					foodTimer.stop();
+					status.setHungry(100);
+					panel.setStatus(0);
+				}
+				panel.setFoodIndex(index);
+
+				index++;
+				repaint();
+			}
+		});
+
 	}
 
 //	class MyActionListener implements ActionListener {
@@ -208,38 +244,10 @@ class LoginView extends JFrame /* implements Runnable */ {
 
 }
 
-class CurrentTime {
-
-	public void runTime(JButton button) {
-		new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				while (true) {
-					String currentTime = LocalTime.now().toString();
-					currentTime = currentTime.split("[.]")[0];
-					button.setText(currentTime);
-					
-				//					Calendar c = Calendar.getInstance();
-//					button.setText(c.get(Calendar.HOUR) + ":" + c.get(Calendar.MINUTE) + ":" + c.get(Calendar.SECOND));
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-
-			}
-		}).start();
-	}
-
-}
-
 class CharacterPanel extends JPanel {
 	private ImageIcon characterImage;
 	private ImageIcon backImage;
-	private ImageIcon foodImage;
+	private ImageIcon food[];
 	private ImageIcon zzz[];
 	private int x = 150;
 	private int y = 150;
@@ -248,9 +256,13 @@ class CharacterPanel extends JPanel {
 	private int zzzX;
 	private int zzzY;
 
-	private int status;
+	private int panelStatus;
 	private int zzzIndex;
-	
+	private int foodIndex;
+
+	Font font;
+
+	CharStatus status;
 //	public CharacterPanel() {
 //
 //	}
@@ -266,22 +278,29 @@ class CharacterPanel extends JPanel {
 //		this.x = x;
 //		this.y = y;
 //	}
-	
-	public CharacterPanel(ImageIcon icon, ImageIcon backImage, ImageIcon foodImage) {
+
+	public CharacterPanel(ImageIcon icon, ImageIcon backImage, CharStatus status) {
 		// super();
-		int status = 1;
+		font = new Font("Gothic", Font.ITALIC, 30);
+		int panelStatus = 1;
+		this.status = status;
 		this.characterImage = icon;
 		this.backImage = backImage;
-		this.foodImage = foodImage;
-		
+
 		zzz = new ImageIcon[3];
 		for (int i = 0; i < zzz.length; i++) {
-			zzz[i] = new ImageIcon("img/z"+i+".png");
+			zzz[i] = new ImageIcon("img/z" + i + ".png");
+
+		}
+		food = new ImageIcon[3];
+		for (int i = 0; i < food.length; i++) {
+			food[i] = new ImageIcon("img/rice" + i + ".png");
+
 		}
 	}
 
 	public void setStatus(int status) {
-		this.status = status;
+		this.panelStatus = status;
 	}
 
 	public void setPos(int x, int y) {
@@ -300,27 +319,38 @@ class CharacterPanel extends JPanel {
 		this.characterImage = icon;
 		repaint();
 	}
+
 	public void setBackImage(ImageIcon icon) {
 		this.backImage = icon;
 		repaint();
 	}
-	
+
 	public void setZzzIndex(int zzzIndex) {
 		this.zzzIndex = zzzIndex;
 	}
 
+	public void setFoodIndex(int foodIndex) {
+		this.foodIndex = foodIndex;
+	}
+
 	public void paintComponent(Graphics g) {
 		// super.paintComponent(g);
-		//System.out.println("x, y :" + this.x + " " + this.y);
+		// System.out.println("x, y :" + this.x + " " + this.y);
+		setFont(font);
+
 		g.drawImage(backImage.getImage(), 0, 0, null);
 		g.drawImage(characterImage.getImage(), x, y, 150, 150, null);
-		if(status==1) {
-			g.drawImage(foodImage.getImage(), 20, 60, 100, 100, null);
+		g.drawString("체력 : " + status.getHungry(), 350, 30);
+		g.drawString("운동 : " + status.getFun() + "", 350, 60);
+		g.drawString("수면 : " + status.getSleep() + "", 340, 90);
+
+		if (panelStatus == 1) {
+			g.drawImage(food[foodIndex].getImage(), 20, 60, 100, 100, null);
 		}
-		if(status==3) {
-				g.drawImage(zzz[zzzIndex].getImage(), x+100, y-100, 150, 150, null);
+		if (panelStatus == 3) {
+			g.drawImage(zzz[zzzIndex].getImage(), x + 100, y - 100, 150, 150, null);
 		}
-		
+
 //		if(a) {
 //			 g.drawImage(characterIcon.getImage(), 150, 150, 150, 150, null); }else {
 //			 g.drawImage(characterIcon1.getImage(), 150, 150, 150, 150, null); }
@@ -347,7 +377,7 @@ class CharacterPanel extends JPanel {
 public class Tamagochi {
 
 	public static void main(String[] args) {
-		new LoginView();
+		new GameStart();
 
 	}
 
